@@ -104,12 +104,6 @@ if st.session_state['name'] and st.session_state['age'] and st.session_state['en
         gallery_folder = "gallery"
         if not os.path.exists(gallery_folder):
             os.makedirs(gallery_folder)
-        uploaded_img = st.file_uploader("Upload a photo to the gallery", type=["jpg", "jpeg", "png", "gif"], key="gallery_upload")
-        if uploaded_img is not None:
-            img_path = os.path.join(gallery_folder, uploaded_img.name)
-            with open(img_path, "wb") as f:
-                f.write(uploaded_img.getbuffer())
-            st.success(f"Uploaded {uploaded_img.name} to the gallery!")
         images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
         if images:
             img_idx = st.slider("Slide through the gallery", 0, len(images)-1, 0)
@@ -120,39 +114,7 @@ if st.session_state['name'] and st.session_state['age'] and st.session_state['en
 
     elif page == "Wishes":
         st.header("🎈 Birthday Wishes")
-        wishes_file = "wishes.json"
-        if os.path.exists(wishes_file):
-            with open(wishes_file, "r") as f:
-                wishes = json.load(f)
-        else:
-            wishes = []
-        with st.form("wish_form"):
-            wish = st.text_area("Write your birthday wish for her:", max_chars=200)
-            wish_submit = st.form_submit_button("Send Wish")
-            if wish_submit and wish.strip():
-                wishes.append(wish.strip())
-                with open(wishes_file, "w") as f:
-                    json.dump(wishes, f)
-                st.success("Your wish has been added!")
-        if wishes:
-            st.markdown("<h4>Birthday Wishes from Friends:</h4>", unsafe_allow_html=True)
-            for idx, msg in enumerate(reversed(wishes), 1):
-                st.markdown(f"<div style='background:#fff3cd;padding:1em;border-radius:10px;margin-bottom:0.5em;color:#333;'><b>Wish {idx}:</b> {msg}</div>", unsafe_allow_html=True)
-        # --- Admin Panel ---
-        st.subheader("🔒 Admin Panel (Birthday Girl Only)")
-        admin_pw = st.text_input("Enter admin password to manage wishes:", type="password")
-        if admin_pw == "happybirthday":
-            st.success("Admin access granted!")
-            if wishes:
-                del_idx = st.selectbox("Select a wish to delete:", [f"Wish {i+1}: {w}" for i, w in enumerate(wishes)])
-                if st.button("Delete Selected Wish"):
-                    idx = [f"Wish {i+1}: {w}" for i, w in enumerate(wishes)].index(del_idx)
-                    wishes.pop(idx)
-                    with open(wishes_file, "w") as f:
-                        json.dump(wishes, f)
-                    st.success("Wish deleted!")
-        elif admin_pw:
-            st.error("Incorrect password.")
+        st.info("Birthday wishes are not being accepted at this time. Enjoy the gallery and music!")
 
     else:
         st.info("Welcome to the birthday app! Use the sidebar to view the gallery or leave a wish.")
