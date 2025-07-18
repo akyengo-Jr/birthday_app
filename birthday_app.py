@@ -60,7 +60,7 @@ if not st.session_state['entered']:
             st.session_state['name'] = name
             st.session_state['age'] = age
             st.session_state['entered'] = True
-            st.experimental_rerun()
+            st.rerun()  # Use st.rerun() instead of st.experimental_rerun()
 
 if st.session_state['name'] and st.session_state['age'] and st.session_state['entered']:
     st.balloons()
