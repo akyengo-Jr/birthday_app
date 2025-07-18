@@ -1,6 +1,4 @@
 import streamlit as st
-from streamlit_extras.animated_headline import animated_headline
-from streamlit_extras.let_it_rain import rain
 from PIL import Image
 import os
 import json
@@ -38,12 +36,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Welcome animation
-animated_headline(
-    "Happy Birthday! 🎉🎂",
-    animation="rainbow",
-    font_size="60px"
-)
+# Welcome headline (replace animated_headline with styled markdown)
+st.markdown("""
+    <h1 style='text-align:center; font-size:3em; background: linear-gradient(90deg, #f9d423, #ff4e50); -webkit-background-clip: text; color: transparent;'>
+        Happy Birthday! 🎉🎂
+    </h1>
+""", unsafe_allow_html=True)
 
 # Input for name and age
 if 'name' not in st.session_state:
@@ -60,19 +58,7 @@ with st.form("birthday_form"):
         st.session_state['age'] = age
 
 if st.session_state['name'] and st.session_state['age']:
-    # Balloons and cakes animation
-    rain(
-        emoji="🎈",
-        font_size=54,
-        falling_speed=5,
-        animation_length="infinite"
-    )
-    rain(
-        emoji="🎂",
-        font_size=54,
-        falling_speed=7,
-        animation_length="infinite"
-    )
+    st.balloons()
     st.markdown(f"<h2 style='text-align:center;'>Happy {st.session_state['age']}th Birthday, {st.session_state['name']}! 🎉</h2>", unsafe_allow_html=True)
     st.markdown("<h4 style='text-align:center;'>Wishing you a day filled with love, laughter, and cake! 🍰</h4>", unsafe_allow_html=True)
 
