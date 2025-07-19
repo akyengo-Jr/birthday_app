@@ -202,22 +202,18 @@ st.markdown('<h1 class="birthday-header">Happy Birthday Rachel! 🎉</h1>', unsa
 st.markdown("""
 <div class="birthday-card">
     <p class="birthday-message">
-        🎀 To the most amazing friend in the world! 🎀<br><br>
-        You light up every room you enter and bring joy to everyone around you. 
-        Today we celebrate YOU - your kindness, your laughter, and your beautiful spirit!<br><br>
-        Thank you for being my rock through everything. Whether it's spiritual guidance, 
-        financial advice, or just being there to laugh at my terrible jokes - you're always there.<br><br>
-        Wishing you a day filled with love, laughter, and all your favorite things! 
-        May this year bring you endless happiness and dreams come true!<br><br>
-        Love you millions! 💖<br><br>
-        P.S. The cake is on me! 🎂
+        Wishing you a wonderful year ahead filled with happiness and success.<br><br>
+        I wanted to take a moment to sincerely thank you for all your support - whether it's been your thoughtful advice, practical help, or just being someone I can count on. Your generosity and reliability have made such a difference, and I'm truly grateful to have you in my life.<br><br>
+        May this birthday bring you as much joy as you bring to others. Hope you have a relaxing day and get to enjoy all your favorite things!<br><br>
+        Best,<br>
+        Akyengo_Jr.
     </p>
     <div style="text-align: center; font-size: 2rem;">🎈🎁🎊</div>
 </div>
 """, unsafe_allow_html=True)
 
 # --- Photo Gallery Section ---
-st.markdown('<h2 class="section-header">Our Beautiful Memories</h2>', unsafe_allow_html=True)
+st.markdown('<h2 class="section-header">YOur Slide show</h2>', unsafe_allow_html=True)
 
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
