@@ -1,128 +1,294 @@
 import streamlit as st
 from PIL import Image
 import os
-import random 
+import random
 import time
 
-# --- Custom CSS ---
-st.markdown(
-    """
-    <style>
-    body {
-        background: linear-gradient(135deg, #f9d423 0%, #ff4e50 100%) !important;
-    }
-    .main {
-        background: none !important;
-    }
-    .gallery-img {
-        border-radius: 20px;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        margin-bottom: 1em;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
-
-# --- Welcome headline and confetti ---
-if "balloons_shown" not in st.session_state:
-    st.balloons()
-    st.session_state["balloons_shown"] = True
-
-# --- Birthday Message ---
+# --- Happy Birthday CSS Styling ---
 st.markdown("""
-<div style='display:flex; justify-content:center; margin-top:2em;'>
-  <div style='background: #fffbe7; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 2em 3em; max-width: 500px; text-align: center;'>
-    <h2 style='color:#ff4e50;'>Happy Birthday, Rachel!</h2>
-    <p style='font-size:1.2em; color:#333;'>
-        Girl, where do I even start? You’re the kind of friend who’s always there—whether I need a prayer, a pep talk, or just someone to laugh with (or at me when I’m being extra 😂). You always show up, and I appreciate you so much.<br>
-        Today is all about YOU! I hope it’s filled with all the love, joy, and blessings you pour into everyone else’s lives. You deserve the world and more.<br>
-        Thanks for being the realest, the kindest, and the absolute GOAT of friends. 🏆<br><br>
-        Now go celebrate like the queen you are! 🥂💖<br><br>
-        Love you loads! ❤️<br><br>
-        P.S. Don’t worry, I got the cake (or wine, whichever you prefer 😉). Let’s turn up!<br><br>
-        This app is a little messed up but I think you can manage 😂
-    </p>
-    <div style='font-size:2em;'>🎉🎁🍰</div>
-  </div>
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Comic+Neue:wght@400;700&display=swap');
+    
+    /* Main background with animated gradient */
+    .stApp {
+        background: linear-gradient(316deg, #ff9a9e, #fad0c4, #fad0c4, #ffecd2, #ff9a9e);
+        background-size: 300% 300%;
+        animation: gradient 15s ease infinite;
+        font-family: 'Comic Neue', cursive;
+    }
+    
+    @keyframes gradient {
+        0% { background-position: 0% 50% }
+        50% { background-position: 100% 50% }
+        100% { background-position: 0% 50% }
+    }
+    
+    /* Header styling */
+    .birthday-header {
+        font-family: 'Dancing Script', cursive;
+        font-size: 3.5rem !important;
+        color: #d83f87;
+        text-align: center;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 0.5rem;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+    
+    /* Card styling */
+    .birthday-card {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-radius: 20px !important;
+        padding: 2rem !important;
+        box-shadow: 0 10px 30px rgba(216, 63, 135, 0.2) !important;
+        border: 2px dashed #d83f87;
+        margin: 1.5rem 0;
+    }
+    
+    /* Message text */
+    .birthday-message {
+        font-size: 1.2rem !important;
+        line-height: 1.8 !important;
+        color: #5a5a5a !important;
+    }
+    
+    /* Gallery image styling */
+    .gallery-img {
+        border-radius: 15px !important;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15) !important;
+        transition: transform 0.3s ease !important;
+        border: 3px solid white !important;
+    }
+    
+    .gallery-img:hover {
+        transform: scale(1.02) !important;
+    }
+    
+    /* Button styling */
+    .stButton>button {
+        background-color: #d83f87 !important;
+        color: white !important;
+        border-radius: 50px !important;
+        padding: 0.5rem 1.5rem !important;
+        font-weight: bold !important;
+        border: none !important;
+        box-shadow: 0 4px 8px rgba(216, 63, 135, 0.3) !important;
+        transition: all 0.3s !important;
+    }
+    
+    .stButton>button:hover {
+        background-color: #c72c76 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 12px rgba(216, 63, 135, 0.4) !important;
+    }
+    
+    /* Section headers */
+    .section-header {
+        font-family: 'Dancing Script', cursive !important;
+        color: #d83f87 !important;
+        font-size: 2rem !important;
+        text-align: center;
+        margin: 1.5rem 0 !important;
+    }
+    
+    /* Floating balloons animation */
+    .balloons {
+        position: fixed;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    .balloon {
+        position: absolute;
+        width: 50px;
+        height: 60px;
+        background: #ff6b6b;
+        border-radius: 50%;
+        animation: float 15s linear infinite;
+        opacity: 0.7;
+    }
+    
+    .balloon:before {
+        content: "";
+        position: absolute;
+        width: 2px;
+        height: 40px;
+        background: #ff6b6b;
+        top: 60px;
+        left: 24px;
+    }
+    
+    .balloon:nth-child(2) {
+        left: 20%;
+        background: #4ecdc4;
+        animation-delay: 2s;
+        animation-duration: 12s;
+    }
+    
+    .balloon:nth-child(3) {
+        left: 40%;
+        background: #ffbe76;
+        animation-delay: 4s;
+        animation-duration: 18s;
+    }
+    
+    .balloon:nth-child(4) {
+        left: 60%;
+        background: #a55eea;
+        animation-delay: 1s;
+        animation-duration: 14s;
+    }
+    
+    .balloon:nth-child(5) {
+        left: 80%;
+        background: #78e08f;
+        animation-delay: 3s;
+        animation-duration: 16s;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(100vh) scale(0.6); }
+        100% { transform: translateY(-100vh) scale(1); }
+    }
+    
+    /* Confetti effect */
+    .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        background-color: #f00;
+        opacity: 0.7;
+        animation: confetti 5s ease-in-out infinite;
+    }
+    
+    @keyframes confetti {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# --- Floating Balloons Background ---
+st.markdown("""
+<div class="balloons">
+    <div class="balloon"></div>
+    <div class="balloon"></div>
+    <div class="balloon"></div>
+    <div class="balloon"></div>
+    <div class="balloon"></div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Gallery Section ---
-st.subheader("I've Put Those Photos to Good Use 📸")
+# --- Initialize Session State ---
+if "balloons_shown" not in st.session_state:
+    st.session_state.balloons_shown = True
+    st.balloons()
+
+if "gallery_idx" not in st.session_state:
+    st.session_state.gallery_idx = 0
+    st.session_state.last_change = time.time()
+
+# --- Birthday Header ---
+st.markdown('<h1 class="birthday-header">Happy Birthday Rachel! 🎉</h1>', unsafe_allow_html=True)
+
+# --- Birthday Card ---
+st.markdown("""
+<div class="birthday-card">
+    <p class="birthday-message">
+        🎀 To the most amazing friend in the world! 🎀<br><br>
+        You light up every room you enter and bring joy to everyone around you. 
+        Today we celebrate YOU - your kindness, your laughter, and your beautiful spirit!<br><br>
+        Thank you for being my rock through everything. Whether it's spiritual guidance, 
+        financial advice, or just being there to laugh at my terrible jokes - you're always there.<br><br>
+        Wishing you a day filled with love, laughter, and all your favorite things! 
+        May this year bring you endless happiness and dreams come true!<br><br>
+        Love you millions! 💖<br><br>
+        P.S. The cake is on me! 🎂
+    </p>
+    <div style="text-align: center; font-size: 2rem;">🎈🎁🎊</div>
+</div>
+""", unsafe_allow_html=True)
+
+# --- Photo Gallery Section ---
+st.markdown('<h2 class="section-header">Our Beautiful Memories</h2>', unsafe_allow_html=True)
 
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
+    
 images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
-
 captions = [
-    "Birthday Girl 🎀✨",
-    "Queen of the Day 👑",
-    "Shine Bright! ✨",
-    "It's Your Moment! 🎉",
-    "Slaying Another Year 💃",
-    "The Star of the Show 🌟",
-    "Age is Just a Number 😉",
-    "Unwrap the Fun! 🎁",
-    "Glow Getter 💖",
-    "Born to Sparkle ✨"
+    "Your smile lights up the world ✨",
+    "Queen of hearts 👑",
+    "Beautiful inside and out 🌸",
+    "Making memories with you 💞",
+    "So blessed to have you in my life 🙏",
+    "The star of every show 🌟",
+    "Age? Just a number! You're forever young 💃",
+    "Unstoppable force of nature 🌈",
+    "My favorite person to laugh with 😂",
+    "God's masterpiece 🎨"
 ]
 
 if images:
-    if 'gallery_idx' not in st.session_state:
-        st.session_state['gallery_idx'] = 0
-        st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
-        st.session_state['last_change'] = time.time()
-
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
+    
     with col1:
-        if st.button("⬅️ Previous", key="prev"):
-            st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] - 1) % len(images)
-            st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
-            st.session_state['last_change'] = time.time()
-            st.rerun()
-
+        if st.button("⬅️ Previous"):
+            st.session_state.gallery_idx = (st.session_state.gallery_idx - 1) % len(images)
+            st.session_state.last_change = time.time()
+    
     with col3:
-        if st.button("Next ➡️", key="next"):
-            st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
-            st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
-            st.session_state['last_change'] = time.time()
-            st.rerun()
-
-    # Auto-advance every 5 seconds if no interaction
-    if time.time() - st.session_state['last_change'] > 5:
-        st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
-        st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
-        st.session_state['last_change'] = time.time()
-        st.rerun()
-
-    # Display current image and caption
-    img_path = os.path.join(gallery_folder, images[st.session_state['gallery_idx']])
-    st.image(Image.open(img_path), use_column_width=True)
-    st.markdown(
-        f"<div style='text-align:center; font-size:1.4em; color:#ff4e50; margin-bottom:2em;'>{captions[st.session_state['caption_idx']]}</div>",
-        unsafe_allow_html=True
-    )
+        if st.button("Next ➡️"):
+            st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
+            st.session_state.last_change = time.time()
+    
+    # Auto-advance logic
+    if time.time() - st.session_state.last_change > 4:  # 4 seconds delay
+        st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
+        st.session_state.last_change = time.time()
+        st.experimental_rerun()
+    
+    # Display current image
+    img_path = os.path.join(gallery_folder, images[st.session_state.gallery_idx])
+    st.image(Image.open(img_path), use_column_width=True, caption=captions[st.session_state.gallery_idx % len(captions)])
+    
+    # Add a small delay for smoother transitions
+    time.sleep(0.1)
 else:
-    st.info("No pictures in the gallery yet. Add images to the 'gallery' folder.")
+    st.info("✨ Photos coming soon! Add images to the 'gallery' folder to see them here!")
 
-# --- Music Section ---
-st.subheader("🎵 Birthday Tune for You!")
+# --- Music Player Section ---
+st.markdown('<h2 class="section-header">Your Birthday Playlist 🎵</h2>', unsafe_allow_html=True)
+
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder)
+    
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    selected_song = st.selectbox("Choose a song:", music_files)
-    audio_path = os.path.join(music_folder, selected_song)
+    selected_song = st.selectbox("Choose your birthday song:", music_files)
+    audio_file = open(os.path.join(music_folder, selected_song), "rb")
+    audio_bytes = audio_file.read()
     
-    # Display audio player with autoplay (note: browsers may block autoplay)
-    audio_bytes = open(audio_path, "rb").read()
-    st.audio(audio_bytes, format="audio/mp3", start_time=0)
-    
-    st.info("Note: Some browsers require you to click play manually due to autoplay restrictions.")
+    st.audio(audio_bytes, format="audio/mp3")
+    st.markdown('<p style="text-align: center; color: #d83f87;">🎧 Turn up the volume and celebrate! 🎶</p>', unsafe_allow_html=True)
 else:
-    st.info("No music files found. Add MP3/WAV files to the 'music' folder.")
+    st.info("🎶 Add some MP3 or WAV files to the 'music' folder for a musical celebration!")
+
+# --- Final Celebration ---
+st.markdown("""
+<div style="text-align: center; margin: 2rem 0;">
+    <h3 style="color: #d83f87;">Wishing you the happiest of birthdays!</h3>
+    <div style="font-size: 2rem; margin: 1rem 0;">🎂 🥳 🎊 🎁 🎈</div>
+</div>
+""", unsafe_allow_html=True)
