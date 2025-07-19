@@ -242,14 +242,14 @@ if images:
             st.session_state.last_change = time.time()
     
     # Auto-advance logic
-    if time.time() - st.session_state.last_change > 4:  # 4 seconds delay
+    if time.time() - st.session_state.last_change > 2.5:  # 2.5 seconds delay
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
         st.session_state.last_change = time.time()
         st.experimental_rerun()
     
     # Display current image
     img_path = os.path.join(gallery_folder, images[st.session_state.gallery_idx])
-    st.image(Image.open(img_path), use_column_width=True, caption=captions[st.session_state.gallery_idx % len(captions)])
+    st.image(Image.open(img_path), use_container_width=True, caption=captions[st.session_state.gallery_idx % len(captions)])
     
     # Add a small delay for smoother transitions
     time.sleep(0.1)
