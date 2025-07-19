@@ -65,7 +65,7 @@ if images:
     st.image(Image.open(os.path.join(gallery_folder, images[st.session_state['gallery_idx']])), use_column_width=True, caption=images[st.session_state['gallery_idx']], output_format="auto")
     time.sleep(2.5)
     st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
-    st.experimental_rerun()
+    st.rerun()
 else:
     st.info("No pictures in the gallery yet. Add images to the 'gallery' folder.")
 
@@ -78,4 +78,5 @@ if music_files:
     selected_song = music_files[0]
     audio_path = os.path.join(music_folder, selected_song)
     audio_bytes = open(audio_path, "rb").read()
-    st.audio(audio_bytes, format='audio/mp3', start_time=0)
+    st.audio(audio_bytes, format=None)  # Let Streamlit auto-detect format
+    st.info("If music does not play automatically, please click the play button above. Some browsers require user interaction to start audio.")
