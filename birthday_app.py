@@ -3,6 +3,7 @@ from PIL import Image
 import os
 import random 
 import time
+
 # --- Custom CSS ---
 st.markdown(
     """
@@ -24,13 +25,11 @@ st.markdown(
 )
 
 # --- Welcome headline and confetti ---
-# --- Balloons only on first entry ---
 if "balloons_shown" not in st.session_state:
     st.balloons()
     st.session_state["balloons_shown"] = True
 
-
-# --- Prewritten birthday card message (fixed unicode error) ---
+# --- Birthday Message ---
 st.markdown("""
 <div style='display:flex; justify-content:center; margin-top:2em;'>
   <div style='background: #fffbe7; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 2em 3em; max-width: 500px; text-align: center;'>
@@ -49,8 +48,8 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Gallery Section: Manual Slideshow ---
-st.subheader("I've Put them photos to good use 📸")
+# --- Gallery Section ---
+st.subheader("I've Put Those Photos to Good Use 📸")
 
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
@@ -75,48 +74,55 @@ if images:
         st.session_state['gallery_idx'] = 0
         st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
         st.session_state['last_change'] = time.time()
-    else:
-        # Only auto-advance if 5 seconds have passed and no button is pressed
-        if time.time() - st.session_state.get('last_change', 0) > 5:
-            st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
-            st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
-            st.session_state['last_change'] = time.time()
 
+    # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
-
     with col1:
         if st.button("⬅️ Previous", key="prev"):
             st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] - 1) % len(images)
             st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
             st.session_state['last_change'] = time.time()
+            st.rerun()
 
     with col3:
         if st.button("Next ➡️", key="next"):
             st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
             st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
             st.session_state['last_change'] = time.time()
+            st.rerun()
 
+    # Auto-advance every 5 seconds if no interaction
+    if time.time() - st.session_state['last_change'] > 5:
+        st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
+        st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
+        st.session_state['last_change'] = time.time()
+        st.rerun()
+
+    # Display current image and caption
     img_path = os.path.join(gallery_folder, images[st.session_state['gallery_idx']])
-    st.image(Image.open(img_path), use_container_width=True)
+    st.image(Image.open(img_path), use_column_width=True)
     st.markdown(
         f"<div style='text-align:center; font-size:1.4em; color:#ff4e50; margin-bottom:2em;'>{captions[st.session_state['caption_idx']]}</div>",
         unsafe_allow_html=True
     )
-
-    # This sleep is needed to allow time passage for the auto-advance to work
-    time.sleep(0.1)
-    st.rerun()
 else:
     st.info("No pictures in the gallery yet. Add images to the 'gallery' folder.")
 
-# --- Music Section: Streamlit Audio Widget ---
+# --- Music Section ---
+st.subheader("🎵 Birthday Tune for You!")
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder)
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
+
 if music_files:
-    selected_song = music_files[0]
+    selected_song = st.selectbox("Choose a song:", music_files)
     audio_path = os.path.join(music_folder, selected_song)
+    
+    # Display audio player with autoplay (note: browsers may block autoplay)
     audio_bytes = open(audio_path, "rb").read()
-    st.audio(audio_bytes, format=None)  # Let Streamlit auto-detect format
-    st.info("If music does not play automatically, please click the play button above. Some browsers require user interaction to start audio.")
+    st.audio(audio_bytes, format="audio/mp3", start_time=0)
+    
+    st.info("Note: Some browsers require you to click play manually due to autoplay restrictions.")
+else:
+    st.info("No music files found. Add MP3/WAV files to the 'music' folder.")
