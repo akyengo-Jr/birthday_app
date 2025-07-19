@@ -277,13 +277,13 @@ if images:
     st.image(
         Image.open(img_path),
         use_container_width=True,
-        caption=f'<div style="text-align:center;font-size:1.2em;color:#d83f87;">{caption}</div>',
+        caption=f'<div style="text-align:center;font-size:1.2em;color:#d83f87;">{caption}</div>', unsafe_allow_html=True
         output_format="PNG"
     )
     
     # Small delay and rerun for auto-advance
     time.sleep(0.1)
-    st.experimental_rerun()
+    st.rerun()
     
 else:
     st.info("✨ No images found in the gallery folder. Add some photos to see the slideshow!")
