@@ -281,14 +281,14 @@ if st.session_state.valid_images:
     if time.time() - st.session_state.last_update > 2.5:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(st.session_state.valid_images)
         st.session_state.last_update = time.time()
-        st.experimental_rerun()
+        st.rerun()
 
 else:
     st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
 
 
 # --- Music Player Section ---
-st.markdown('<h2 class="section-header">🎵 Birthday Music</h2>', unsafe_allow_html=True)
+st.markdown('<h2 class="section-header">Your Birthday Playlist 🎵</h2>', unsafe_allow_html=True)
 
 music_folder = "music"
 if not os.path.exists(music_folder):
@@ -297,11 +297,19 @@ if not os.path.exists(music_folder):
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    selected_song = st.selectbox("Choose a song:", music_files)
+    selected_song = st.selectbox("Choose your birthday song:", music_files)
     audio_file = open(os.path.join(music_folder, selected_song), "rb")
     audio_bytes = audio_file.read()
     
     st.audio(audio_bytes, format="audio/mp3")
-    st.info("Click the play button to start the music!")
+    st.markdown('<p style="text-align: center; color: #d83f87;">🎧 Turn up the volume and celebrate! 🎶</p>', unsafe_allow_html=True)
 else:
-    st.info("🎶 Add some MP3 or WAV files to the 'music' folder for birthday tunes!")
+    st.info("🎶 Add some MP3 or WAV files to the 'music' folder for a musical celebration!")
+
+# --- Final Celebration ---
+st.markdown("""
+<div style="text-align: center; margin: 2rem 0;">
+    <h3 style="color: #d83f87;">Wishing you the happiest of birthdays!</h3>
+    <div style="font-size: 2rem; margin: 1rem 0;">🎂 🥳 🎊 🎁 🎈</div>
+</div>
+""", unsafe_allow_html=True)
