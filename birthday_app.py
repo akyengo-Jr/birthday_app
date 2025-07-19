@@ -61,18 +61,22 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Music Player ---
-st.subheader("🎵 Birthday Music")
+# --- Auto-play and loop birthday music (hidden player) ---
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder)
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 if music_files:
-    selected_song = st.selectbox("Pick a song to play:", music_files)
-    audio_bytes = open(os.path.join(music_folder, selected_song), 'rb').read()
-    st.audio(audio_bytes, format='audio/mp3')
-else:
-    st.info("Add mp3 or wav files to the 'music' folder to play birthday songs!")
+    # Pick the first song automatically
+    selected_song = music_files[0]
+    audio_path = os.path.join(music_folder, selected_song)
+    # Use HTML5 audio tag for autoplay and loop
+    st.markdown(f'''
+        <audio src="{audio_path}" autoplay loop hidden>
+            Your browser does not support the audio element.
+        </audio>
+        <div style="display:none">Music is playing...</div>
+    ''', unsafe_allow_html=True)
 
 # --- Gallery Section ---
 st.subheader("Photo Gallery 📸")
