@@ -1,7 +1,6 @@
 import streamlit as st
 from PIL import Image
 import os
-import random
 import time
 
 # --- Happy Birthday CSS Styling ---
@@ -104,6 +103,7 @@ st.markdown("""
         pointer-events: none;
         z-index: -1;
     }
+    
     .image-caption {
         font-size: 1.2em !important;
         font-weight: 600 !important;
@@ -169,21 +169,6 @@ st.markdown("""
         0% { transform: translateY(100vh) scale(0.6); }
         100% { transform: translateY(-100vh) scale(1); }
     }
-    
-    /* Confetti effect */
-    .confetti {
-        position: fixed;
-        width: 10px;
-        height: 10px;
-        background-color: #f00;
-        opacity: 0.7;
-        animation: confetti 5s ease-in-out infinite;
-    }
-    
-    @keyframes confetti {
-        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
-    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -203,6 +188,11 @@ if "balloons_shown" not in st.session_state:
     st.session_state.balloons_shown = True
     st.balloons()
 
+if 'gallery_idx' not in st.session_state:
+    st.session_state.gallery_idx = 0
+    st.session_state.last_update = time.time()
+    st.session_state.valid_images = []
+
 # --- Birthday Header ---
 st.markdown('<h1 class="birthday-header">Happy Birthday Rachel! 🎉</h1>', unsafe_allow_html=True)
 
@@ -220,21 +210,25 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-
-# --- Initialize Session State ---
-if 'gallery_idx' not in st.session_state:
-    st.session_state.gallery_idx = 0
-    st.session_state.last_update = time.time()
-    st.session_state.initialized = True
-
 # --- Gallery Section ---
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
-    os.makedirs(gallery_folder)
-    
-images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
+    os.makedirs(gallery_folder, exist_ok=True)
+
+# Load valid images only once
+if not st.session_state.valid_images:
+    for f in os.listdir(gallery_folder):
+        file_path = os.path.join(gallery_folder, f)
+        try:
+            if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
+                with Image.open(file_path) as img:
+                    img.verify()  # Verify it's an image
+                st.session_state.valid_images.append(f)
+        except (IOError, SyntaxError, Exception) as e:
+            st.warning(f"Skipping invalid image file: {f}")
+
 captions = [
-    "Smile  ✨",
+    "Smile ✨",
     "Queen of hearts 👑",
     "Beautiful inside and out 🌸",
     "Today's all yours 💞",
@@ -245,58 +239,64 @@ captions = [
     "God's masterpiece 🎨"
 ]
 
-if images:
+if st.session_state.valid_images:
+    st.markdown('<h2 class="section-header">Photo Gallery</h2>', unsafe_allow_html=True)
+    
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
     with col1:
-        if st.button("⬅️ Previous"):
-            st.session_state.gallery_idx = (st.session_state.gallery_idx - 1) % len(images)
+        if st.button("⬅️ Previous", key="prev_btn"):
+            st.session_state.gallery_idx = (st.session_state.gallery_idx - 1) % len(st.session_state.valid_images)
             st.session_state.last_update = time.time()
     with col3:
-        if st.button("Next ➡️"):
-            st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
+        if st.button("Next ➡️", key="next_btn"):
+            st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(st.session_state.valid_images)
             st.session_state.last_update = time.time()
-    st.image(
-        Image.open(img_path),
-        use_column_width=True,
-        caption=f'<div class="image-caption">{caption}</div>',
-        output_format="PNG"
-    )
     
-    # Display current image and caption
-    current_idx = st.session_state.gallery_idx % len(images)
-    img_path = os.path.join(gallery_folder, images[current_idx])
+    # Display current image with styled caption
+    current_idx = st.session_state.gallery_idx % len(st.session_state.valid_images)
+    img_path = os.path.join(gallery_folder, st.session_state.valid_images[current_idx])
     caption = captions[current_idx % len(captions)]
     
-    st.image(
-        Image.open(img_path),
-        use_container_width=True,
-        caption=caption
-    )
+    try:
+        img = Image.open(img_path)
+        st.image(
+            img,
+            use_column_width=True,
+            caption=f'<div class="image-caption">{caption}</div>',
+            output_format="PNG"
+        )
+    except Exception as e:
+        st.error(f"Error displaying image: {e}")
+        # Remove problematic image from list
+        st.session_state.valid_images.pop(current_idx)
+        st.session_state.gallery_idx = 0  # Reset to first image
+        st.experimental_rerun()
     
-    # Auto-advance logic
+    # Auto-advance every 3 seconds
     if time.time() - st.session_state.last_update > 3:
-        st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
+        st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(st.session_state.valid_images)
         st.session_state.last_update = time.time()
-        time.sleep(0.1)  # Small delay to prevent rapid updates
-        st.rerun()
+        time.sleep(0.1)
+        st.experimental_rerun()
 else:
-    st.info("✨ Photos coming soon! Add images to the 'gallery' folder to see them here!")
+    st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
 
 # --- Music Player Section ---
-st.subheader("🎵 Birthday Music")
+st.markdown('<h2 class="section-header">🎵 Birthday Music</h2>', unsafe_allow_html=True)
 music_folder = "music"
 if not os.path.exists(music_folder):
-    os.makedirs(music_folder)
+    os.makedirs(music_folder, exist_ok=True)
     
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    selected_song = st.selectbox("Choose a song:", music_files)
-    audio_file = open(os.path.join(music_folder, selected_song), "rb")
-    audio_bytes = audio_file.read()
-    
-    st.audio(audio_bytes, format="audio/mp3")
-    st.info("Click the play button to start the music!")
+    selected_song = st.selectbox("Choose a song:", music_files, key="song_selector")
+    try:
+        with open(os.path.join(music_folder, selected_song), "rb") as audio_file:
+            audio_bytes = audio_file.read()
+        st.audio(audio_bytes, format="audio/mp3")
+    except Exception as e:
+        st.error(f"Error loading audio file: {e}")
 else:
-    st.info("🎶 Add some MP3 or WAV files to the 'music' folder for birthday tunes!")
+    st.info("🎶 No music files found. Add MP3 or WAV files to the 'music' folder.")
