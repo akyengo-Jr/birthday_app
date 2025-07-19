@@ -251,7 +251,7 @@ if valid_images:
         st.image(
             img,
             use_container_width=True,
-            caption=f'<div class="image-caption">{caption}</div>',
+            caption=st.markdown('<div class="image-caption">{caption}</div>', unsafe_allow_html=True)
             output_format="PNG"
         )
     except Exception as e:
