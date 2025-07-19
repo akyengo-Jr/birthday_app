@@ -198,6 +198,7 @@ def birthday_card():
     </div>
     """, unsafe_allow_html=True)
 
+# --- Photo Gallery Section ---
 def photo_gallery():
     # Initialize session state
     if 'gallery_index' not in st.session_state:
@@ -239,31 +240,37 @@ def photo_gallery():
                 st.session_state.gallery_index = (st.session_state.gallery_index + 1) % len(valid_images)
                 st.balloons()
         
-        # Display current image
+        # Display current image with styled caption
         current_idx = st.session_state.gallery_index % len(valid_images)
         img_path = os.path.join(gallery_folder, valid_images[current_idx])
         caption = captions[current_idx % len(captions)]
         
-           try:
-                img = Image.open(img_path)
-        # Create a container for the image and caption
-                with st.container():
-                    st.image(
-                        img,
-                        use_column_width=True,
-                        output_format="PNG"
-                    )
-            # Add styled caption below the image
-                st.markdown(
-                    f'<div class="image-caption">{caption}</div>', 
-                    unsafe_allow_html=True
-                )
-            except Exception as e:
-                st.error(f"Error displaying image: {e}")
-                st.session_state.gallery_index = 0
-                st.experimental_rerun()
+        # Create container for image and caption
+        gallery_container = st.container()
+        with gallery_container:
+            # Display image
+            st.image(
+                img_path,
+                use_column_width=True,
+                output_format="PNG"
+            )
+            
+            # Display styled caption below image
+            st.markdown(
+                f'<div class="image-caption">{caption}</div>',
+                unsafe_allow_html=True
+            )
+            
+        # Error handling
+        try:
+            Image.open(img_path)  # Verify image can be opened
+        except Exception as e:
+            st.error(f"Error displaying image: {e}")
+            st.session_state.gallery_index = 0  # Reset to first image
+            st.experimental_rerun()
     else:
         st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
+
 
 def music_player():
     st.markdown('<h2 class="section-header">🎵 Birthday Music</h2>', unsafe_allow_html=True)
