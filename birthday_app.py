@@ -251,9 +251,9 @@ if valid_images:
         st.image(
             img,
             use_container_width=True,
-            caption=st.markdown('<div class="image-caption">{caption}</div>', unsafe_allow_html=True)
             output_format="PNG"
         )
+    st.markdown('<div class="image-caption">{caption}</div>', unsafe_allow_html=True)
     except Exception as e:
         st.error(f"Error displaying image: {e}")
         st.session_state.gallery_index = 0  # Reset to first image
