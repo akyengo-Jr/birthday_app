@@ -222,15 +222,14 @@ if not os.path.exists(gallery_folder):
     
 images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
 captions = [
-    "Your smile lights up the world ✨",
+    "Smile  ✨",
     "Queen of hearts 👑",
     "Beautiful inside and out 🌸",
-    "Making memories with you 💞",
+    "Today's all yours 💞",
     "So blessed to have you in my life 🙏",
-    "The star of every show 🌟",
+    "The star of today's show 🌟",
     "Age? Just a number! You're forever young 💃",
-    "Unstoppable force of nature 🌈",
-    "My favorite person to laugh with 😂",
+    "Unstoppable force 🌈",
     "God's masterpiece 🎨"
 ]
 
@@ -253,7 +252,7 @@ if images:
     
     st.image(
         Image.open(img_path),
-        use_column_width=True,
+        use_container_width=True,
         caption=caption
     )
     
