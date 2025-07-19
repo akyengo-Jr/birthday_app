@@ -183,23 +183,10 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Initialize Session State for Gallery ---
-if 'gallery_state' not in st.session_state:
-    st.session_state.gallery_state = {
-        'valid_images': [],
-        'index': 0,
-        'last_change': time.time(),
-        'prev_index': -1
-    }
 # --- Initialize Session State ---
-if 'valid_images' not in st.session_state:
-    st.session_state.valid_images = []
-if 'gallery_idx' not in st.session_state:
-    st.session_state.gallery_idx = 0
-if 'last_update' not in st.session_state:
-    st.session_state.last_update = time.time()
-if 'prev_idx' not in st.session_state:
-    st.session_state.prev_idx = -1
+if 'gallery_index' not in st.session_state:
+    st.session_state.gallery_index = 0
+    st.balloons()  # Show balloons on first load
 
 # --- Birthday Header ---
 st.markdown('<h1 class="birthday-header">Happy Birthday Rachel! 🎉</h1>', unsafe_allow_html=True)
@@ -218,72 +205,59 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# --- Gallery Section ---
+# --- Photo Gallery Section ---
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder, exist_ok=True)
 
-# Load images only if we haven't already
-gallery_folder = "gallery"
-if not os.path.exists(gallery_folder):
-    os.makedirs(gallery_folder, exist_ok=True)
+# Load valid images
+valid_images = []
+for f in os.listdir(gallery_folder):
+    try:
+        if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
+            with Image.open(os.path.join(gallery_folder, f)) as img:
+                img.verify()
+            valid_images.append(f)
+    except (IOError, SyntaxError, Exception) as e:
+        st.warning(f"Skipping invalid image file: {f}")
 
-# Load images only if we haven't already
-if not st.session_state.gallery_state['valid_images']:
-    for f in os.listdir(gallery_folder):
-        try:
-            if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
-                with Image.open(os.path.join(gallery_folder, f)) as img:
-                    img.verify()
-                st.session_state.gallery_state['valid_images'].append(f)
-        except (IOError, SyntaxError, Exception) as e:
-            st.warning(f"Skipping invalid image file: {f}")
+captions = [
+    "Birthday Girl 🎀✨", "Queen of the Day 👑", "Shine Bright! ✨",
+    "It's Your Moment! 🎉", "Slaying Another Year 💃", "The Star of the Show 🌟",
+    "Age is Just a Number 😉", "Unwrap the Fun! 🎁", "Glow Getter 💖", "Born to Sparkle ✨"
+]
 
-if st.session_state.gallery_state['valid_images']:
+if valid_images:
     st.markdown('<h2 class="section-header">Photo Gallery</h2>', unsafe_allow_html=True)
     
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
     with col1:
-        if st.button("⬅️ Previous", key="prev_btn"):
-            st.session_state.gallery_state['index'] = (st.session_state.gallery_state['index'] - 1) % len(st.session_state.gallery_state['valid_images'])
-            st.session_state.gallery_state['last_change'] = time.time()
+        if st.button("⬅️ Previous"):
+            st.session_state.gallery_index = (st.session_state.gallery_index - 1) % len(valid_images)
+            st.balloons()
     with col3:
-        if st.button("Next ➡️", key="next_btn"):
-            st.session_state.gallery_state['index'] = (st.session_state.gallery_state['index'] + 1) % len(st.session_state.gallery_state['valid_images'])
-            st.session_state.gallery_state['last_change'] = time.time()
+        if st.button("Next ➡️"):
+            st.session_state.gallery_index = (st.session_state.gallery_index + 1) % len(valid_images)
+            st.balloons()
     
     # Display current image
-    current_idx = st.session_state.gallery_state['index'] % len(st.session_state.gallery_state['valid_images'])
-    img_path = os.path.join(gallery_folder, st.session_state.gallery_state['valid_images'][current_idx])
+    current_idx = st.session_state.gallery_index % len(valid_images)
+    img_path = os.path.join(gallery_folder, valid_images[current_idx])
     caption = captions[current_idx % len(captions)]
-    
-    # Show balloons if image changed
-    if st.session_state.gallery_state['prev_index'] != current_idx:
-        st.balloons()
-        st.session_state.gallery_state['prev_index'] = current_idx
     
     try:
         img = Image.open(img_path)
         st.image(
             img,
-            use_column_width=True,
+            use_container_width=True,
             caption=f'<div class="image-caption">{caption}</div>',
             output_format="PNG"
         )
     except Exception as e:
         st.error(f"Error displaying image: {e}")
-        st.session_state.gallery_state['valid_images'].pop(current_idx)
-        st.session_state.gallery_state['index'] = 0
-        st.session_state.gallery_state['prev_index'] = -1
+        st.session_state.gallery_index = 0  # Reset to first image
         st.experimental_rerun()
-    
-    # Auto-advance every 2.5 seconds
-    if time.time() - st.session_state.gallery_state['last_change'] > 2.5:
-        st.session_state.gallery_state['index'] = (st.session_state.gallery_state['index'] + 1) % len(st.session_state.gallery_state['valid_images'])
-        st.session_state.gallery_state['last_change'] = time.time()
-        st.experimental_rerun()
-
 else:
     st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
 
@@ -293,51 +267,41 @@ music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder, exist_ok=True)
 
-# Initialize music state
-if 'music_state' not in st.session_state:
-    st.session_state.music_state = {
-        'files': [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))],
-        'current_index': 0,
-        'audio_bytes': None
-    }
+# Initialize music player
+if 'current_song' not in st.session_state:
+    st.session_state.current_song = None
 
-# Reload music files if directory changes
-current_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
-if current_files != st.session_state.music_state['files']:
-    st.session_state.music_state['files'] = current_files
-    st.session_state.music_state['current_index'] = 0
-    st.session_state.music_state['audio_bytes'] = None
+music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
-if st.session_state.music_state['files']:
-    # Create persistent audio player
+if music_files:
+    # Create audio placeholder that won't reset on reruns
     audio_placeholder = st.empty()
     
-    # Song selection
-    selected_index = st.selectbox(
-        "Choose a song:",
-        range(len(st.session_state.music_state['files'])),
-        format_func=lambda x: st.session_state.music_state['files'][x],
+    selected_song = st.selectbox(
+        "Choose a song:", 
+        music_files,
         key="song_selector"
     )
     
-    # Load audio if selection changed or not loaded
-    if (selected_index != st.session_state.music_state['current_index'] or 
-        st.session_state.music_state['audio_bytes'] is None):
+    # Only reload if song changed
+    if selected_song != st.session_state.current_song:
         try:
-            with open(os.path.join(music_folder, st.session_state.music_state['files'][selected_index]), "rb") as f:
-                st.session_state.music_state['audio_bytes'] = f.read()
-            st.session_state.music_state['current_index'] = selected_index
+            with open(os.path.join(music_folder, selected_song), "rb") as audio_file:
+                audio_bytes = audio_file.read()
+            st.session_state.current_song = selected_song
+            st.session_state.audio_bytes = audio_bytes
         except Exception as e:
-            st.error(f"Error loading audio: {e}")
+            st.error(f"Error loading audio file: {e}")
     
     # Display audio player
-    if st.session_state.music_state['audio_bytes']:
+    if hasattr(st.session_state, 'audio_bytes'):
         audio_placeholder.audio(
-            st.session_state.music_state['audio_bytes'],
+            st.session_state.audio_bytes,
             format="audio/mp3"
         )
 else:
     st.info("🎶 No music files found. Add MP3 or WAV files to the 'music' folder.")
+
 # --- Final Celebration ---
 st.markdown("""
 <div style="text-align: center; margin: 2rem 0;">
