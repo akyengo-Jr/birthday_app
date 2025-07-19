@@ -281,7 +281,7 @@ if st.session_state.valid_images:
     if time.time() - st.session_state.last_update > 2.5:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(st.session_state.valid_images)
         st.session_state.last_update = time.time()
-        st.rerun()
+        st.experimental_rerun()
 
 else:
     st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
