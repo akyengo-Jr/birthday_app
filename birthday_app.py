@@ -245,17 +245,14 @@ if valid_images:
     current_idx = st.session_state.gallery_index % len(valid_images)
     img_path = os.path.join(gallery_folder, valid_images[current_idx])
     caption = captions[current_idx % len(captions)]
-    
-    try:
+  try:
         img = Image.open(img_path)
+        # Use markdown to render the caption with HTML styling
+        st.markdown(f'<div class="image-caption">{caption}</div>', unsafe_allow_html=True)
         st.image(
             img,
-            use_container_width=True,
+            use_column_width=True,
             output_format="PNG"
-        )
-    st.markdown(
-            f'<div class="image-caption" style="margin-top:-20px;margin-bottom:20px">{caption}</div>', 
-            unsafe_allow_html=True
         )
     except Exception as e:
         st.error(f"Error displaying image: {e}")
