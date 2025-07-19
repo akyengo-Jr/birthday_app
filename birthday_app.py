@@ -260,7 +260,7 @@ if images:
             st.session_state.show_balloons = True
     
     # Auto-advance logic (2.5 seconds)
-    if time.time() - st.session_state.last_change > 4:
+    if time.time() - st.session_state.last_change > 5:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
         st.session_state.last_change = time.time()
         st.session_state.show_balloons = True
@@ -276,18 +276,18 @@ if images:
     
     st.image(
         Image.open(img_path),
-        use_container_width=True,
-        caption=f'<div style="text-align:center;font-size:1.2em;color:#d83f87;">{caption}</div>', 
-        output_format="PNG",
-        unsafe_allow_html=True
+        use_column_width=True,
+        caption=f'<div style="text-align:center;font-size:1.2em;color:#d83f87;">{caption}</div>',
+        output_format="PNG"
     )
     
     # Small delay and rerun for auto-advance
     time.sleep(0.1)
-    st.rerun()
+    st.experimental_rerun()
     
 else:
     st.info("✨ No images found in the gallery folder. Add some photos to see the slideshow!")
+    
 # --- Music Player Section ---
 st.markdown('<h2 class="section-header">Your Birthday Playlist 🎵</h2>', unsafe_allow_html=True)
 
