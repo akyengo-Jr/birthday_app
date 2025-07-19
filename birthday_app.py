@@ -245,7 +245,7 @@ if images:
     if time.time() - st.session_state.last_change > 2.5:  # 2.5 seconds delay
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
         st.session_state.last_change = time.time()
-        st.experimental_rerun()
+        st.rerun()
     
     # Display current image
     img_path = os.path.join(gallery_folder, images[st.session_state.gallery_idx])
