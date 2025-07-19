@@ -184,14 +184,14 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Initialize Session State ---
-if "balloons_shown" not in st.session_state:
-    st.session_state.balloons_shown = True
-    st.balloons()
-
+if 'valid_images' not in st.session_state:
+    st.session_state.valid_images = []
 if 'gallery_idx' not in st.session_state:
     st.session_state.gallery_idx = 0
+if 'last_update' not in st.session_state:
     st.session_state.last_update = time.time()
-    st.session_state.valid_images = []
+if 'prev_idx' not in st.session_state:
+    st.session_state.prev_idx = -1
 
 # --- Birthday Header ---
 st.markdown('<h1 class="birthday-header">Happy Birthday Rachel! 🎉</h1>', unsafe_allow_html=True)
@@ -215,36 +215,25 @@ gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder, exist_ok=True)
 
-# Load valid images only once
+# Load images only if we haven't already
 if not st.session_state.valid_images:
     for f in os.listdir(gallery_folder):
-        file_path = os.path.join(gallery_folder, f)
         try:
             if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
-                with Image.open(file_path) as img:
-                    img.verify()  # Verify it's an image
+                with Image.open(os.path.join(gallery_folder, f)) as img:
+                    img.verify()
                 st.session_state.valid_images.append(f)
         except (IOError, SyntaxError, Exception) as e:
             st.warning(f"Skipping invalid image file: {f}")
 
 captions = [
-    "Smile ✨",
-    "Queen of hearts 👑",
-    "Beautiful inside and out 🌸",
-    "Today's all yours 💞",
-    "So blessed to have you in my life 🙏",
-    "The star of today's show 🌟",
-    "Age? Just a number! You're forever young 💃",
-    "Unstoppable force 🌈",
-    "God's masterpiece 🎨"
+    "Birthday Girl 🎀✨", "Queen of the Day 👑", "Shine Bright! ✨",
+    "It's Your Moment! 🎉", "Slaying Another Year 💃", "The Star of the Show 🌟",
+    "Age is Just a Number 😉", "Unwrap the Fun! 🎁", "Glow Getter 💖", "Born to Sparkle ✨"
 ]
 
 if st.session_state.valid_images:
     st.markdown('<h2 class="section-header">Photo Gallery</h2>', unsafe_allow_html=True)
-    
-    # Track previous index to detect changes
-    if 'prev_idx' not in st.session_state:
-        st.session_state.prev_idx = -1
     
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
@@ -257,7 +246,7 @@ if st.session_state.valid_images:
             st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(st.session_state.valid_images)
             st.session_state.last_update = time.time()
     
-    # Display current image with styled caption
+    # Display current image
     current_idx = st.session_state.gallery_idx % len(st.session_state.valid_images)
     img_path = os.path.join(gallery_folder, st.session_state.valid_images[current_idx])
     caption = captions[current_idx % len(captions)]
@@ -269,18 +258,24 @@ if st.session_state.valid_images:
     
     try:
         img = Image.open(img_path)
-        # Use markdown to render the caption with HTML styling
-        st.markdown(f'<div class="image-caption">{caption}</div>', unsafe_allow_html=True)
+        # Display image with styled caption
         st.image(
             img,
-            use_column_width=True,
+            use_container_width=True,
+            caption=caption,  # Regular caption without HTML
             output_format="PNG"
+        )
+        # Add styled caption separately
+        st.markdown(
+            f'<div class="image-caption" style="margin-top:-20px;margin-bottom:20px">{caption}</div>', 
+            unsafe_allow_html=True
         )
     except Exception as e:
         st.error(f"Error displaying image: {e}")
         st.session_state.valid_images.pop(current_idx)
-        st.session_state.gallery_idx = 0
-        st.session_state.prev_idx = -1
+        if len(st.session_state.valid_images) == 0:
+            st.session_state.gallery_idx = 0
+            st.session_state.prev_idx = -1
         st.experimental_rerun()
     
     # Auto-advance every 2.5 seconds
@@ -288,6 +283,7 @@ if st.session_state.valid_images:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(st.session_state.valid_images)
         st.session_state.last_update = time.time()
         st.experimental_rerun()
+
 else:
     st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
     
