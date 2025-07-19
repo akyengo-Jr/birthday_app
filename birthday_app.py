@@ -248,7 +248,7 @@ def photo_gallery():
             img = Image.open(img_path)
             st.image(
                 img,
-                use_column_width=True,
+                use_container_width=True,
                 caption=f'<div class="image-caption">{caption}</div>',
                 output_format="PNG"
             )
