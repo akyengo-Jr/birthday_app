@@ -191,10 +191,6 @@ if "balloons_shown" not in st.session_state:
     st.session_state.balloons_shown = True
     st.balloons()
 
-if "gallery_idx" not in st.session_state:
-    st.session_state.gallery_idx = 0
-    st.session_state.last_change = time.time()
-
 # --- Birthday Header ---
 st.markdown('<h1 class="birthday-header">Happy Birthday Rachel! 🎉</h1>', unsafe_allow_html=True)
 
@@ -211,6 +207,15 @@ st.markdown("""
     <div style="text-align: center; font-size: 2rem;">🎈🎁🎊</div>
 </div>
 """, unsafe_allow_html=True)
+
+
+# --- Initialize Session State ---
+if 'gallery_idx' not in st.session_state:
+    st.session_state.gallery_idx = 0
+    st.session_state.last_update = time.time()
+    st.session_state.initialized = True
+
+# --- Gallery Section ---
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
@@ -218,7 +223,7 @@ if not os.path.exists(gallery_folder):
 images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
 captions = [
     "Your smile lights up the world ✨",
-    "Queen of hearts 👑", 
+    "Queen of hearts 👑",
     "Beautiful inside and out 🌸",
     "Making memories with you 💞",
     "So blessed to have you in my life 🙏",
@@ -230,14 +235,6 @@ captions = [
 ]
 
 if images:
-    # Initialize session state
-    if 'gallery_idx' not in st.session_state:
-        st.session_state.gallery_idx = 0
-        st.session_state.last_update = time.time()
-    
-    # Create container for gallery
-    gallery_container = st.container()
-    
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
     with col1:
@@ -250,30 +247,27 @@ if images:
             st.session_state.last_update = time.time()
     
     # Display current image and caption
-    with gallery_container:
-        current_idx = st.session_state.gallery_idx % len(images)
-        img_path = os.path.join(gallery_folder, images[current_idx])
-        caption = captions[current_idx % len(captions)]
-        
-        st.image(
-            Image.open(img_path),
-            use_column_width=True,
-            caption=caption
-        )
+    current_idx = st.session_state.gallery_idx % len(images)
+    img_path = os.path.join(gallery_folder, images[current_idx])
+    caption = captions[current_idx % len(captions)]
     
-    # Auto-advance every 3 seconds
+    st.image(
+        Image.open(img_path),
+        use_column_width=True,
+        caption=caption
+    )
+    
+    # Auto-advance logic
     if time.time() - st.session_state.last_update > 3:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
         st.session_state.last_update = time.time()
-        st.rerun()  # This will refresh the entire app
-        
+        time.sleep(0.1)  # Small delay to prevent rapid updates
+        st.experimental_rerun()
 else:
     st.info("✨ Photos coming soon! Add images to the 'gallery' folder to see them here!")
 
-
 # --- Music Player Section ---
-st.markdown('<h2 class="section-header">Your Birthday Playlist 🎵</h2>', unsafe_allow_html=True)
-
+st.subheader("🎵 Birthday Music")
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder)
@@ -281,19 +275,11 @@ if not os.path.exists(music_folder):
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    selected_song = st.selectbox("Choose your birthday song:", music_files)
+    selected_song = st.selectbox("Choose a song:", music_files)
     audio_file = open(os.path.join(music_folder, selected_song), "rb")
     audio_bytes = audio_file.read()
     
     st.audio(audio_bytes, format="audio/mp3")
-    st.markdown('<p style="text-align: center; color: #d83f87;">🎧 Turn up the volume and celebrate! 🎶</p>', unsafe_allow_html=True)
+    st.info("Click the play button to start the music!")
 else:
-    st.info("🎶 Add some MP3 or WAV files to the 'music' folder for a musical celebration!")
-
-# --- Final Celebration ---
-st.markdown("""
-<div style="text-align: center; margin: 2rem 0;">
-    <h3 style="color: #d83f87;">Wishing you the happiest of birthdays!</h3>
-    <div style="font-size: 2rem; margin: 1rem 0;">🎂 🥳 🎊 🎁 🎈</div>
-</div>
-""", unsafe_allow_html=True)
+    st.info("🎶 Add some MP3 or WAV files to the 'music' folder for birthday tunes!")
