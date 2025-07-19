@@ -285,50 +285,54 @@ if st.session_state.valid_images:
 
 else:
     st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
-    
+
+
 # --- Music Player Section ---
 st.markdown('<h2 class="section-header">🎵 Birthday Music</h2>', unsafe_allow_html=True)
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder, exist_ok=True)
 
-# Initialize music state if not exists
-if 'current_song' not in st.session_state:
-    st.session_state.current_song = None
-    st.session_state.audio_bytes = None
+# Initialize music state
+if 'music_state' not in st.session_state:
+    st.session_state.music_state = {
+        'current_song': None,
+        'audio_bytes': None,
+        'last_played': None
+    }
 
 # Get music files
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    # Create selectbox with unique key
+    # Create audio container that won't be affected by reruns
+    audio_placeholder = st.empty()
+    
+    # Song selection
     selected_song = st.selectbox(
         "Choose a song:", 
-        music_files, 
-        key="song_selector",
-        index=0 if not st.session_state.current_song else music_files.index(st.session_state.current_song)
+        music_files,
+        key="song_selector"
     )
     
-    # Only reload if song changed
-    if selected_song != st.session_state.current_song:
+    # Load new song if selection changed
+    if selected_song != st.session_state.music_state['current_song']:
         try:
             with open(os.path.join(music_folder, selected_song), "rb") as audio_file:
-                st.session_state.audio_bytes = audio_file.read()
-            st.session_state.current_song = selected_song
-            st.rerun()  # Refresh to ensure audio player updates
+                st.session_state.music_state['audio_bytes'] = audio_file.read()
+            st.session_state.music_state['current_song'] = selected_song
+            st.session_state.music_state['last_played'] = time.time()
         except Exception as e:
             st.error(f"Error loading audio file: {e}")
-            st.session_state.current_song = None
-            st.session_state.audio_bytes = None
+            st.session_state.music_state['current_song'] = None
+            st.session_state.music_state['audio_bytes'] = None
     
-    # Display audio player if we have bytes
-    if st.session_state.audio_bytes:
-        st.audio(
-            st.session_state.audio_bytes, 
+    # Display audio player (in the placeholder to prevent recreation on rerun)
+    if st.session_state.music_state['audio_bytes']:
+        audio_placeholder.audio(
+            st.session_state.music_state['audio_bytes'],
             format="audio/mp3",
-            start_time=0  # Start from beginning when changed
+            start_time=0 if time.time() - st.session_state.music_state['last_played'] > 1 else None
         )
-    else:
-        st.warning("Could not load audio file")
 else:
     st.info("🎶 No music files found. Add MP3 or WAV files to the 'music' folder.")
