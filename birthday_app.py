@@ -244,18 +244,24 @@ def photo_gallery():
         img_path = os.path.join(gallery_folder, valid_images[current_idx])
         caption = captions[current_idx % len(captions)]
         
-        try:
-            img = Image.open(img_path)
+       try:
+        img = Image.open(img_path)
+        # Create a container for the image and caption
+        with st.container():
             st.image(
                 img,
-                use_container_width=True,
-                caption=f'<div class="image-caption">{caption}</div>',
+                use_column_width=True,
                 output_format="PNG"
             )
-        except Exception as e:
-            st.error(f"Error displaying image: {e}")
-            st.session_state.gallery_index = 0  # Reset to first image
-            st.experimental_rerun()
+            # Add styled caption below the image
+            st.markdown(
+                f'<div class="image-caption">{caption}</div>', 
+                unsafe_allow_html=True
+            )
+    except Exception as e:
+        st.error(f"Error displaying image: {e}")
+        st.session_state.gallery_index = 0
+        st.experimental_rerun()
     else:
         st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
 
