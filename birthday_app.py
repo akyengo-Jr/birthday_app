@@ -211,7 +211,6 @@ st.markdown("""
     <div style="text-align: center; font-size: 2rem;">🎈🎁🎊</div>
 </div>
 """, unsafe_allow_html=True)
-# --- Photo Gallery Section ---
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
@@ -219,7 +218,7 @@ if not os.path.exists(gallery_folder):
 images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
 captions = [
     "Your smile lights up the world ✨",
-    "Queen of hearts 👑",
+    "Queen of hearts 👑", 
     "Beautiful inside and out 🌸",
     "Making memories with you 💞",
     "So blessed to have you in my life 🙏",
@@ -231,46 +230,43 @@ captions = [
 ]
 
 if images:
-    # Initialize gallery state
+    # Initialize session state
     if 'gallery_idx' not in st.session_state:
         st.session_state.gallery_idx = 0
-        st.session_state.last_change = time.time()
+        st.session_state.last_update = time.time()
     
-    # Create placeholder for the gallery
-    gallery_placeholder = st.empty()
+    # Create container for gallery
+    gallery_container = st.container()
     
-    # Navigation buttons (outside the placeholder)
+    # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
-    
     with col1:
         if st.button("⬅️ Previous"):
             st.session_state.gallery_idx = (st.session_state.gallery_idx - 1) % len(images)
-            st.session_state.last_change = time.time()
-    
+            st.session_state.last_update = time.time()
     with col3:
         if st.button("Next ➡️"):
             st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
-            st.session_state.last_change = time.time()
+            st.session_state.last_update = time.time()
     
-    # Display current image with matching caption
-    current_idx = st.session_state.gallery_idx % len(images)
-    img_path = os.path.join(gallery_folder, images[current_idx])
-    caption = captions[current_idx % len(captions)]
-    
-    with gallery_placeholder.container():
+    # Display current image and caption
+    with gallery_container:
+        current_idx = st.session_state.gallery_idx % len(images)
+        img_path = os.path.join(gallery_folder, images[current_idx])
+        caption = captions[current_idx % len(captions)]
+        
         st.image(
             Image.open(img_path),
             use_column_width=True,
             caption=caption
         )
     
-    # Auto-advance logic (without using rerun)
-    if time.time() - st.session_state.last_change > 3:  # 3 seconds delay
+    # Auto-advance every 3 seconds
+    if time.time() - st.session_state.last_update > 3:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
-        st.session_state.last_change = time.time()
-        time.sleep(0.1)  # Small delay to prevent rapid updates
-        gallery_placeholder.empty()  # Clear the placeholder to trigger update
-    
+        st.session_state.last_update = time.time()
+        st.rerun()  # This will refresh the entire app
+        
 else:
     st.info("✨ Photos coming soon! Add images to the 'gallery' folder to see them here!")
 
