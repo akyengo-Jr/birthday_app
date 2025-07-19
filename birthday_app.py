@@ -50,7 +50,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Gallery Section: Manual Slideshow ---
-t.subheader("Here are some of your Photos 📸")
+st.subheader("I've Put them photos to good use 📸")
 
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
