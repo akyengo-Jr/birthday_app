@@ -277,8 +277,9 @@ if images:
     st.image(
         Image.open(img_path),
         use_container_width=True,
-        caption=f'<div style="text-align:center;font-size:1.2em;color:#d83f87;">{caption}</div>', unsafe_allow_html=True
-        output_format="PNG"
+        caption=f'<div style="text-align:center;font-size:1.2em;color:#d83f87;">{caption}</div>', 
+        output_format="PNG",
+        unsafe_allow_html=True
     )
     
     # Small delay and rerun for auto-advance
