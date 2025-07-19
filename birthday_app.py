@@ -217,45 +217,76 @@ st.markdown('<h2 class="section-header">YOur Slide show</h2>', unsafe_allow_html
 
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
-    os.makedirs(gallery_folder)
+    os.makedirs(gallery_folder, exist_ok=True)
     
-images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
-captions =  [
+# Get valid image files
+images = []
+for f in os.listdir(gallery_folder):
+    try:
+        if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif")):
+            with Image.open(os.path.join(gallery_folder, f)) as img:
+                img.verify()  # Verify it's a valid image
+            images.append(f)
+    except (IOError, SyntaxError, Exception):
+        st.warning(f"Skipping invalid image file: {f}")
+        continue
+
+captions = [
     "Birthday Girl 🎀✨", "Queen of the Day 👑", "Shine Bright! ✨",
     "It's Your Moment! 🎉", "Slaying Another Year 💃", "The Star of the Show 🌟",
     "Age is Just a Number 😉", "Unwrap the Fun! 🎁", "Glow Getter 💖", "Born to Sparkle ✨"
 ]
 
-
 if images:
+    # Initialize session state
+    if 'gallery_idx' not in st.session_state:
+        st.session_state.gallery_idx = 0
+        st.session_state.last_change = time.time()
+        st.session_state.show_balloons = False
+    
     # Navigation buttons
     col1, col2, col3 = st.columns([1, 6, 1])
     
     with col1:
-        if st.button("⬅️ Previous"):
+        if st.button("⬅️ Previous", key="prev_btn"):
             st.session_state.gallery_idx = (st.session_state.gallery_idx - 1) % len(images)
             st.session_state.last_change = time.time()
+            st.session_state.show_balloons = True
     
     with col3:
-        if st.button("Next ➡️"):
+        if st.button("Next ➡️", key="next_btn"):
             st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
             st.session_state.last_change = time.time()
+            st.session_state.show_balloons = True
     
-    # Auto-advance logic
-    if time.time() - st.session_state.last_change > 2.5:  # 2.5 seconds delay
+    # Auto-advance logic (2.5 seconds)
+    if time.time() - st.session_state.last_change > 2.5:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
         st.session_state.last_change = time.time()
-        st.rerun()
+        st.session_state.show_balloons = True
     
-    # Display current image
+    # Show balloons if image changed
+    if st.session_state.show_balloons:
+        st.balloons()
+        st.session_state.show_balloons = False
+    
+    # Display current image with caption
     img_path = os.path.join(gallery_folder, images[st.session_state.gallery_idx])
-    st.image(Image.open(img_path), use_container_width=True, caption=captions[st.session_state.gallery_idx % len(captions)])
+    caption = captions[st.session_state.gallery_idx % len(captions)]
     
-    # Add a small delay for smoother transitions
+    st.image(
+        Image.open(img_path),
+        use_column_width=True,
+        caption=f'<div style="text-align:center;font-size:1.2em;color:#d83f87;">{caption}</div>',
+        output_format="PNG"
+    )
+    
+    # Small delay and rerun for auto-advance
     time.sleep(0.1)
+    st.rerun()
+    
 else:
-    st.info("✨ Photos coming soon! Add images to the 'gallery' folder to see them here!")
-
+    st.info("✨ No images found in the gallery folder. Add some photos to see the slideshow!")
 # --- Music Player Section ---
 st.markdown('<h2 class="section-header">Your Birthday Playlist 🎵</h2>', unsafe_allow_html=True)
 
