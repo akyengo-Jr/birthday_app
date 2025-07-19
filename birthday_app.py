@@ -114,19 +114,9 @@ music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder)
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
-
-st.write("Found music files:", music_files)  # Debug: see what the app detects
-
 if music_files:
     selected_song = music_files[0]
     audio_path = os.path.join(music_folder, selected_song)
-    try:
-        with open(audio_path, "rb") as audio_file:
-            audio_bytes = audio_file.read()
-        file_ext = os.path.splitext(selected_song)[1].lower()[1:]  # removes dot
-        st.audio(audio_bytes, format=f"audio/{file_ext}")
-        st.info("If music does not play automatically, please click the play button above. Some browsers require user interaction to start audio.")
-    except Exception as e:
-        st.error(f"Error loading audio file: {e}")
-else:
-    st.info("No music files found in the 'music' folder. Please add .mp3 or .wav files.")
+    audio_bytes = open(audio_path, "rb").read()
+    st.audio(audio_bytes, format=None)  # Let Streamlit auto-detect format
+    st.info("If music does not play automatically, please click the play button above. Some browsers require user interaction to start audio.")
