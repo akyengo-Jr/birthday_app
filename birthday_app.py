@@ -291,16 +291,44 @@ st.markdown('<h2 class="section-header">🎵 Birthday Music</h2>', unsafe_allow_
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder, exist_ok=True)
-    
+
+# Initialize music state if not exists
+if 'current_song' not in st.session_state:
+    st.session_state.current_song = None
+    st.session_state.audio_bytes = None
+
+# Get music files
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    selected_song = st.selectbox("Choose a song:", music_files, key="song_selector")
-    try:
-        with open(os.path.join(music_folder, selected_song), "rb") as audio_file:
-            audio_bytes = audio_file.read()
-        st.audio(audio_bytes, format="audio/mp3")
-    except Exception as e:
-        st.error(f"Error loading audio file: {e}")
+    # Create selectbox with unique key
+    selected_song = st.selectbox(
+        "Choose a song:", 
+        music_files, 
+        key="song_selector",
+        index=0 if not st.session_state.current_song else music_files.index(st.session_state.current_song)
+    )
+    
+    # Only reload if song changed
+    if selected_song != st.session_state.current_song:
+        try:
+            with open(os.path.join(music_folder, selected_song), "rb") as audio_file:
+                st.session_state.audio_bytes = audio_file.read()
+            st.session_state.current_song = selected_song
+            st.rerun()  # Refresh to ensure audio player updates
+        except Exception as e:
+            st.error(f"Error loading audio file: {e}")
+            st.session_state.current_song = None
+            st.session_state.audio_bytes = None
+    
+    # Display audio player if we have bytes
+    if st.session_state.audio_bytes:
+        st.audio(
+            st.session_state.audio_bytes, 
+            format="audio/mp3",
+            start_time=0  # Start from beginning when changed
+        )
+    else:
+        st.warning("Could not load audio file")
 else:
     st.info("🎶 No music files found. Add MP3 or WAV files to the 'music' folder.")
