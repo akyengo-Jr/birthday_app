@@ -212,8 +212,6 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 # --- Photo Gallery Section ---
-st.markdown('<h2 class="section-header">Our Beautiful Memories</h2>', unsafe_allow_html=True)
-
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
@@ -233,12 +231,15 @@ captions = [
 ]
 
 if images:
-    # Initialize or update gallery state
+    # Initialize gallery state
     if 'gallery_idx' not in st.session_state:
         st.session_state.gallery_idx = 0
         st.session_state.last_change = time.time()
     
-    # Navigation buttons
+    # Create placeholder for the gallery
+    gallery_placeholder = st.empty()
+    
+    # Navigation buttons (outside the placeholder)
     col1, col2, col3 = st.columns([1, 6, 1])
     
     with col1:
@@ -251,30 +252,29 @@ if images:
             st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
             st.session_state.last_change = time.time()
     
-    # Auto-advance every 3 seconds
-    if time.time() - st.session_state.last_change > 3:  # Changed to 3 seconds
-        st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
-        st.session_state.last_change = time.time()
-        st.experimental_rerun()
-    
     # Display current image with matching caption
-    img_path = os.path.join(gallery_folder, images[st.session_state.gallery_idx])
-    caption = captions[st.session_state.gallery_idx % len(captions)]  # Get matching caption
+    current_idx = st.session_state.gallery_idx % len(images)
+    img_path = os.path.join(gallery_folder, images[current_idx])
+    caption = captions[current_idx % len(captions)]
     
-    # Create a container for the image and caption
-    gallery_container = st.container()
-    with gallery_container:
+    with gallery_placeholder.container():
         st.image(
-            Image.open(img_path), 
+            Image.open(img_path),
             use_column_width=True,
-            caption=caption,
-            output_format="PNG"
+            caption=caption
         )
     
-    # Add a small delay for smoother transitions
-    time.sleep(0.1)
+    # Auto-advance logic (without using rerun)
+    if time.time() - st.session_state.last_change > 3:  # 3 seconds delay
+        st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
+        st.session_state.last_change = time.time()
+        time.sleep(0.1)  # Small delay to prevent rapid updates
+        gallery_placeholder.empty()  # Clear the placeholder to trigger update
+    
 else:
     st.info("✨ Photos coming soon! Add images to the 'gallery' folder to see them here!")
+
+
 # --- Music Player Section ---
 st.markdown('<h2 class="section-header">Your Birthday Playlist 🎵</h2>', unsafe_allow_html=True)
 
