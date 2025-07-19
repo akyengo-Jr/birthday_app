@@ -260,7 +260,7 @@ if images:
             st.session_state.show_balloons = True
     
     # Auto-advance logic (2.5 seconds)
-    if time.time() - st.session_state.last_change > 5:
+    if time.time() - st.session_state.last_change > 4:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
         st.session_state.last_change = time.time()
         st.session_state.show_balloons = True
