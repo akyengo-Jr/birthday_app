@@ -23,9 +23,14 @@ st.markdown(
 )
 
 # --- Welcome headline and confetti ---
-st.balloons()
+# --- Balloons only on first entry ---
+if "balloons_shown" not in st.session_state:
+    st.balloons()
+    st.session_state["balloons_shown"] = True
+
+# --- Huge Happy Birthday Header ---
 st.markdown("""
-    <h1 style='text-align:center; font-size:3em; background: linear-gradient(90deg, #f9d423, #ff4e50); -webkit-background-clip: text; color: transparent;'>
+    <h1 style='text-align:center; font-size:5em; margin-top:0.2em; background: linear-gradient(90deg, #f9d423, #ff4e50); -webkit-background-clip: text; color: transparent; font-weight:bold; letter-spacing:0.05em;'>
         Happy Birthday! 🎉🎂
     </h1>
 """, unsafe_allow_html=True)
@@ -50,7 +55,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Gallery Section: Manual Slideshow ---
-st.subheader("Photo Gallery 📸")
+st.subheader("Here are some of your Photos 📸")
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
@@ -59,19 +64,11 @@ images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", "
 if images:
     if 'gallery_idx' not in st.session_state:
         st.session_state['gallery_idx'] = 0
-
-    col1, col2, col3 = st.columns([1, 6, 1])
-    with col2:
-        img_path = os.path.join(gallery_folder, images[st.session_state['gallery_idx']])
-        st.image(Image.open(img_path), use_column_width=True, caption=images[st.session_state['gallery_idx']], output_format="auto")
-
-    col1, col2, col3 = st.columns([1, 6, 1])
-    with col1:
-        if st.button("Previous") and st.session_state['gallery_idx'] > 0:
-            st.session_state['gallery_idx'] -= 1
-    with col3:
-        if st.button("Next") and st.session_state['gallery_idx'] < len(images) - 1:
-            st.session_state['gallery_idx'] += 1
+    img_path = os.path.join(gallery_folder, images[st.session_state['gallery_idx']])
+    st.image(Image.open(img_path), use_container_width=True, caption=images[st.session_state['gallery_idx']])
+    time.sleep(2.5)  # Change image every 2.5 seconds (adjust as desired)
+    st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
+    st.rerun()
 else:
     st.info("No pictures in the gallery yet. Add images to the 'gallery' folder.")
 
