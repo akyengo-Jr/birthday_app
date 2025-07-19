@@ -1,31 +1,17 @@
 import streamlit as st
 from PIL import Image
 import os
-import json
 import base64
 
-# Custom CSS
+# --- Custom CSS ---
 st.markdown(
     """
     <style>
+    body {
+        background: linear-gradient(135deg, #f9d423 0%, #ff4e50 100%) !important;
+    }
     .main {
-        background: linear-gradient(135deg, #f9d423 0%, #ff4e50 100%);
-        color: #fff;
-    }
-    .stButton>button {
-        background-color: #ff4e50;
-        color: white;
-        border-radius: 20px;
-        font-size: 18px;
-        padding: 0.5em 2em;
-    }
-    .stTextInput>div>div>input {
-        border-radius: 10px;
-        border: 2px solid #f9d423;
-        font-size: 18px;
-    }
-    .stSlider>div>div>div {
-        background: #f9d423;
+        background: none !important;
     }
     .gallery-img {
         border-radius: 20px;
@@ -37,59 +23,51 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Welcome headline
+# --- Welcome headline and confetti ---
+st.balloons()
 st.markdown("""
     <h1 style='text-align:center; font-size:3em; background: linear-gradient(90deg, #f9d423, #ff4e50); -webkit-background-clip: text; color: transparent;'>
         Happy Birthday! 🎉🎂
     </h1>
 """, unsafe_allow_html=True)
 
-# Confetti on entry
-st.balloons()
-
-# Prewritten birthday card message
+# --- Prewritten birthday card message ---
 st.markdown("""
 <div style='display:flex; justify-content:center; margin-top:2em;'>
   <div style='background: #fffbe7; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 2em 3em; max-width: 500px; text-align: center;'>
-    <h2 style='color:#ff4e50;'>Happy Birthday, [Name]!</h2>
+    <h2 style='color:#ff4e50;'>Happy Birthday, Rachel!</h2>
     <p style='font-size:1.2em; color:#333;'>
-        Girl, where do I even start? You’re the kind of friend who’s always there—whether I need a prayer, a pep talk, or just someone to laugh with (or at me when I’m being extra 😂). You’ve literally been helping me in every way I can think ofspiritually, financially, emotionally… you name it, you’ve helped me through it.
-
-        Today is all about YOU! I hope it’s filled with all the love, joy, and blessings you pour into everyone else’s lives. You deserve the world and more. 
-        Thanks for being the realest, the kindest, and the absolute GOAT of friends. 🏆
-
-        Now go celebrate like the queen you are! 🥂💖
-
-        Love you loads! ❤️
-
-
-        P.S. Don’t worry, I got the cake (or wine, whichever you prefer 😉). Let’s turn up!
-            
-        This app is a little messed up but i think you can manage 😂    
+        Girl, where do I even start? You’re the kind of friend who’s always there—whether I need a prayer, a pep talk, or just someone to laugh with (or at me when I’m being extra 😂). You’ve literally been helping me in every way I can think of—spiritually, financially, emotionally… you name it, you’ve helped me through it.<br><br>
+        Today is all about YOU! I hope it’s filled with all the love, joy, and blessings you pour into everyone else’s lives. You deserve the world and more.<br>
+        Thanks for being the realest, the kindest, and the absolute GOAT of friends. 🏆<br><br>
+        Now go celebrate like the queen you are! 🥂💖<br><br>
+        Love you loads! ❤️<br><br>
+        P.S. Don’t worry, I got the cake (or wine, whichever you prefer 😉). Let’s turn up!<br><br>
+        This app is a little messed up but I think you can manage 😂
     </p>
     <div style='font-size:2em;'>🎉🎁🍰</div>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-# --- Auto-play and loop birthday music (hidden player) ---
+# --- Auto-play and loop birthday music (hidden player, base64 for Streamlit Cloud) ---
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder)
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 if music_files:
     selected_song = music_files[0]
-    # Serve the file as a static asset for Streamlit Cloud compatibility
-    import pathlib
     audio_path = os.path.join(music_folder, selected_song)
-    audio_url = f'/app/{music_folder}/{selected_song}' if 'streamlit' in os.environ.get('SERVER_SOFTWARE', '').lower() else audio_path
+    with open(audio_path, "rb") as f:
+        audio_bytes = f.read()
+    b64 = base64.b64encode(audio_bytes).decode()
     st.markdown(f'''
         <audio autoplay loop style="display:none;">
-            <source src="{audio_url}" type="audio/mp3">
+            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
         </audio>
     ''', unsafe_allow_html=True)
 
-# --- Gallery Section ---
+# --- Gallery Section: Fading Slideshow ---
 st.subheader("Photo Gallery 📸")
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
@@ -97,8 +75,6 @@ if not os.path.exists(gallery_folder):
 images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
 if images:
     import streamlit.components.v1 as components
-    # Prepare base64 images for HTML
-    import base64
     img_tags = []
     for img in images:
         img_path = os.path.join(gallery_folder, img)
