@@ -253,55 +253,36 @@ if valid_images:
             use_container_width=True,
             output_format="PNG"
         )
-    st.markdown('<div class="image-caption">{caption}</div>', unsafe_allow_html=True)
+    st.markdown(
+            f'<div class="image-caption" style="margin-top:-20px;margin-bottom:20px">{caption}</div>', 
+            unsafe_allow_html=True
+        )
     except Exception as e:
         st.error(f"Error displaying image: {e}")
         st.session_state.gallery_index = 0  # Reset to first image
         st.experimental_rerun()
 else:
     st.info("✨ No valid images found in the 'gallery' folder. Please add some images!")
+    
 
 # --- Music Player Section ---
 st.markdown('<h2 class="section-header">🎵 Birthday Music</h2>', unsafe_allow_html=True)
 music_folder = "music"
 if not os.path.exists(music_folder):
-    os.makedirs(music_folder, exist_ok=True)
-
-# Initialize music player
-if 'current_song' not in st.session_state:
-    st.session_state.current_song = None
-
+    os.makedirs(music_folder)
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    # Create audio placeholder that won't reset on reruns
-    audio_placeholder = st.empty()
+    selected_song = st.selectbox("Choose a song:", music_files)
+    audio_path = os.path.join(music_folder, selected_song)
     
-    selected_song = st.selectbox(
-        "Choose a song:", 
-        music_files,
-        key="song_selector"
-    )
+    # Display audio player with autoplay (note: browsers may block autoplay)
+    audio_bytes = open(audio_path, "rb").read()
+    st.audio(audio_bytes, format="audio/mp3", start_time=0)
     
-    # Only reload if song changed
-    if selected_song != st.session_state.current_song:
-        try:
-            with open(os.path.join(music_folder, selected_song), "rb") as audio_file:
-                audio_bytes = audio_file.read()
-            st.session_state.current_song = selected_song
-            st.session_state.audio_bytes = audio_bytes
-        except Exception as e:
-            st.error(f"Error loading audio file: {e}")
-    
-    # Display audio player
-    if hasattr(st.session_state, 'audio_bytes'):
-        audio_placeholder.audio(
-            st.session_state.audio_bytes,
-            format="audio/mp3"
-        )
+    st.info("Note: Some browsers require you to click play manually due to autoplay restrictions.")
 else:
-    st.info("🎶 No music files found. Add MP3 or WAV files to the 'music' folder.")
-
+    st.info("No music files found. Add MP3/WAV files to the 'music' folder.")
 # --- Final Celebration ---
 st.markdown("""
 <div style="text-align: center; margin: 2rem 0;">
