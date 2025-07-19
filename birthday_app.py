@@ -50,7 +50,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Gallery Section: Manual Slideshow ---
-st.subheader("Here are some of your Photos 📸")
+t.subheader("Here are some of your Photos 📸")
+
 gallery_folder = "gallery"
 if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
@@ -72,36 +73,57 @@ captions = [
 if images:
     if 'gallery_idx' not in st.session_state:
         st.session_state['gallery_idx'] = 0
+        st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
+        st.session_state['last_change'] = time.time()
+    else:
+        # Only auto-advance if 5 seconds have passed and no button is pressed
+        if time.time() - st.session_state.get('last_change', 0) > 5:
+            st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
+            st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
+            st.session_state['last_change'] = time.time()
+
+    col1, col2, col3 = st.columns([1, 6, 1])
+
+    with col1:
+        if st.button("⬅️ Previous", key="prev"):
+            st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] - 1) % len(images)
+            st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
+            st.session_state['last_change'] = time.time()
+
+    with col3:
+        if st.button("Next ➡️", key="next"):
+            st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
+            st.session_state['caption_idx'] = random.randint(0, len(captions)-1)
+            st.session_state['last_change'] = time.time()
+
     img_path = os.path.join(gallery_folder, images[st.session_state['gallery_idx']])
     st.image(Image.open(img_path), use_container_width=True)
     st.markdown(
-        f"<div style='text-align:center; font-size:1.4em; color:#ff4e50; margin-bottom:2em;'>{random.choice(captions)}</div>",
+        f"<div style='text-align:center; font-size:1.4em; color:#ff4e50; margin-bottom:2em;'>{captions[st.session_state['caption_idx']]}</div>",
         unsafe_allow_html=True
     )
-    time.sleep(2.5)  # Change image every 2.5 seconds (adjust as desired)
-    st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
+
+    # This sleep is needed to allow time passage for the auto-advance to work
+    time.sleep(0.1)
     st.rerun()
 else:
-    st.info("No pictures in the gallery yet. Add images to the 'gallery' folder.")
     
 # --- Music Section: Streamlit Audio Widget ---
 music_folder = "music"
 if not os.path.exists(music_folder):
     os.makedirs(music_folder)
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
+
+st.write("Found music files:", music_files)  # Debug: see what the app detects
+
 if music_files:
     selected_song = music_files[0]
     audio_path = os.path.join(music_folder, selected_song)
     try:
         with open(audio_path, "rb") as audio_file:
             audio_bytes = audio_file.read()
-        file_ext = os.path.splitext(selected_song)[1].lower()
-        if file_ext == ".mp3":
-            st.audio(audio_bytes, format="audio/mp3")
-        elif file_ext == ".wav":
-            st.audio(audio_bytes, format="audio/wav")
-        else:
-            st.audio(audio_bytes)  # fallback
+        file_ext = os.path.splitext(selected_song)[1].lower()[1:]  # removes dot
+        st.audio(audio_bytes, format=f"audio/{file_ext}")
         st.info("If music does not play automatically, please click the play button above. Some browsers require user interaction to start audio.")
     except Exception as e:
         st.error(f"Error loading audio file: {e}")
