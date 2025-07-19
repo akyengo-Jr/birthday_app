@@ -107,7 +107,8 @@ if images:
     time.sleep(0.1)
     st.rerun()
 else:
-    
+    st.info("No pictures in the gallery yet. Add images to the 'gallery' folder.")
+
 # --- Music Section: Streamlit Audio Widget ---
 music_folder = "music"
 if not os.path.exists(music_folder):
