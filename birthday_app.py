@@ -1,7 +1,8 @@
 import streamlit as st
 from PIL import Image
 import os
-
+import random 
+import time
 # --- Custom CSS ---
 st.markdown(
     """
@@ -28,12 +29,6 @@ if "balloons_shown" not in st.session_state:
     st.balloons()
     st.session_state["balloons_shown"] = True
 
-# --- Huge Happy Birthday Header ---
-st.markdown("""
-    <h1 style='text-align:center; font-size:5em; margin-top:0.2em; background: linear-gradient(90deg, #f9d423, #ff4e50); -webkit-background-clip: text; color: transparent; font-weight:bold; letter-spacing:0.05em;'>
-        Happy Birthday! 🎉🎂
-    </h1>
-""", unsafe_allow_html=True)
 
 # --- Prewritten birthday card message (fixed unicode error) ---
 st.markdown("""
@@ -61,17 +56,33 @@ if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
 images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
 
+captions = [
+    "Birthday Girl 🎀✨",
+    "Queen of the Day 👑",
+    "Shine Bright! ✨",
+    "It's Your Moment! 🎉",
+    "Slaying Another Year 💃",
+    "The Star of the Show 🌟",
+    "Age is Just a Number 😉",
+    "Unwrap the Fun! 🎁",
+    "Glow Getter 💖",
+    "Born to Sparkle ✨"
+]
+
 if images:
     if 'gallery_idx' not in st.session_state:
         st.session_state['gallery_idx'] = 0
     img_path = os.path.join(gallery_folder, images[st.session_state['gallery_idx']])
-    st.image(Image.open(img_path), use_container_width=True, caption=images[st.session_state['gallery_idx']])
+    st.image(Image.open(img_path), use_container_width=True)
+    st.markdown(
+        f"<div style='text-align:center; font-size:1.4em; color:#ff4e50; margin-bottom:2em;'>{random.choice(captions)}</div>",
+        unsafe_allow_html=True
+    )
     time.sleep(2.5)  # Change image every 2.5 seconds (adjust as desired)
     st.session_state['gallery_idx'] = (st.session_state['gallery_idx'] + 1) % len(images)
     st.rerun()
 else:
     st.info("No pictures in the gallery yet. Add images to the 'gallery' folder.")
-
 # --- Music Section: Streamlit Audio Widget ---
 music_folder = "music"
 if not os.path.exists(music_folder):
