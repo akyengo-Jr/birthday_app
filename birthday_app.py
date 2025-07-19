@@ -289,50 +289,19 @@ else:
 
 # --- Music Player Section ---
 st.markdown('<h2 class="section-header">🎵 Birthday Music</h2>', unsafe_allow_html=True)
+
 music_folder = "music"
 if not os.path.exists(music_folder):
-    os.makedirs(music_folder, exist_ok=True)
-
-# Initialize music state
-if 'music_state' not in st.session_state:
-    st.session_state.music_state = {
-        'current_song': None,
-        'audio_bytes': None,
-        'last_played': None
-    }
-
-# Get music files
+    os.makedirs(music_folder)
+    
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 
 if music_files:
-    # Create audio container that won't be affected by reruns
-    audio_placeholder = st.empty()
+    selected_song = st.selectbox("Choose a song:", music_files)
+    audio_file = open(os.path.join(music_folder, selected_song), "rb")
+    audio_bytes = audio_file.read()
     
-    # Song selection
-    selected_song = st.selectbox(
-        "Choose a song:", 
-        music_files,
-        key="song_selector"
-    )
-    
-    # Load new song if selection changed
-    if selected_song != st.session_state.music_state['current_song']:
-        try:
-            with open(os.path.join(music_folder, selected_song), "rb") as audio_file:
-                st.session_state.music_state['audio_bytes'] = audio_file.read()
-            st.session_state.music_state['current_song'] = selected_song
-            st.session_state.music_state['last_played'] = time.time()
-        except Exception as e:
-            st.error(f"Error loading audio file: {e}")
-            st.session_state.music_state['current_song'] = None
-            st.session_state.music_state['audio_bytes'] = None
-    
-    # Display audio player (in the placeholder to prevent recreation on rerun)
-    if st.session_state.music_state['audio_bytes']:
-        audio_placeholder.audio(
-            st.session_state.music_state['audio_bytes'],
-            format="audio/mp3",
-            start_time=0 if time.time() - st.session_state.music_state['last_played'] > 1 else None
-        )
+    st.audio(audio_bytes, format="audio/mp3")
+    st.info("Click the play button to start the music!")
 else:
-    st.info("🎶 No music files found. Add MP3 or WAV files to the 'music' folder.")
+    st.info("🎶 Add some MP3 or WAV files to the 'music' folder for birthday tunes!")
