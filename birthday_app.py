@@ -104,6 +104,18 @@ st.markdown("""
         pointer-events: none;
         z-index: -1;
     }
+    .image-caption {
+        font-size: 1.2em !important;
+        font-weight: 600 !important;
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7) !important;
+        background: linear-gradient(135deg, #ff4e50aa 0%, #d83f87aa 100%) !important;
+        padding: 8px 15px !important;
+        border-radius: 20px !important;
+        margin-top: 10px !important;
+        text-align: center !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2) !important;
+    }
     
     .balloon {
         position: absolute;
@@ -244,6 +256,12 @@ if images:
         if st.button("Next ➡️"):
             st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
             st.session_state.last_update = time.time()
+    st.image(
+        Image.open(img_path),
+        use_column_width=True,
+        caption=f'<div class="image-caption">{caption}</div>',
+        output_format="PNG"
+    )
     
     # Display current image and caption
     current_idx = st.session_state.gallery_idx % len(images)
