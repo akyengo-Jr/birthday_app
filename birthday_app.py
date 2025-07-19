@@ -53,9 +53,19 @@ st.markdown("""
   <div style='background: #fffbe7; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 2em 3em; max-width: 500px; text-align: center;'>
     <h2 style='color:#ff4e50;'>Happy Birthday, [Name]!</h2>
     <p style='font-size:1.2em; color:#333;'>
-      Wishing you a day filled with laughter, love, and all your favorite things.<br>
-      May your year ahead sparkle with joy and bring you wonderful memories.<br>
-      Enjoy your special day to the fullest! 🎈🎂💖
+        Girl, where do I even start? You’re the kind of friend who’s always there—whether I need a prayer, a pep talk, or just someone to laugh with (or at me when I’m being extra 😂). You’ve literally been helping me in every way I can think ofspiritually, financially, emotionally… you name it, you’ve helped me through it.
+
+        Today is all about YOU! I hope it’s filled with all the love, joy, and blessings you pour into everyone else’s lives. You deserve the world and more. 
+        Thanks for being the realest, the kindest, and the absolute GOAT of friends. 🏆
+
+        Now go celebrate like the queen you are! 🥂💖
+
+        Love you loads! ❤️
+
+
+        P.S. Don’t worry, I got the cake (or wine, whichever you prefer 😉). Let’s turn up!
+            
+        This app is a little messed up but i think you can manage 😂    
     </p>
     <div style='font-size:2em;'>🎉🎁🍰</div>
   </div>
@@ -69,14 +79,13 @@ if not os.path.exists(music_folder):
 music_files = [f for f in os.listdir(music_folder) if f.lower().endswith((".mp3", ".wav"))]
 if music_files:
     selected_song = music_files[0]
-    # For Streamlit Cloud, serve the file as a static asset
+    # Serve the file as a static asset for Streamlit Cloud compatibility
+    import pathlib
     audio_path = os.path.join(music_folder, selected_song)
-    with open(audio_path, "rb") as f:
-        audio_bytes = f.read()
-    b64 = base64.b64encode(audio_bytes).decode()
+    audio_url = f'/app/{music_folder}/{selected_song}' if 'streamlit' in os.environ.get('SERVER_SOFTWARE', '').lower() else audio_path
     st.markdown(f'''
-        <audio autoplay loop>
-            <source src="data:audio/mp3;base64,{b64}" type="audio/mp3">
+        <audio autoplay loop style="display:none;">
+            <source src="{audio_url}" type="audio/mp3">
         </audio>
     ''', unsafe_allow_html=True)
 
@@ -87,7 +96,6 @@ if not os.path.exists(gallery_folder):
     os.makedirs(gallery_folder)
 images = [f for f in os.listdir(gallery_folder) if f.lower().endswith((".png", ".jpg", ".jpeg", ".gif"))]
 if images:
-    import time
     import streamlit.components.v1 as components
     # Prepare base64 images for HTML
     import base64
@@ -96,9 +104,10 @@ if images:
         img_path = os.path.join(gallery_folder, img)
         with open(img_path, "rb") as f:
             data = f.read()
+            ext = img.split('.')[-1].lower()
+            mime = 'jpeg' if ext in ['jpg', 'jpeg'] else ext
             b64 = base64.b64encode(data).decode()
-            img_tags.append(f'<img src="data:image/jpeg;base64,{b64}" class="fade-img" style="width:100%;max-width:500px;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.2);margin-bottom:1em;display:none;"/>')
-    # HTML/JS for fading slideshow
+            img_tags.append(f'<img src="data:image/{mime};base64,{b64}" class="fade-img" style="width:100%;max-width:500px;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.2);margin-bottom:1em;display:none;"/>')
     html = f'''
     <style>
     .fade-img {{
