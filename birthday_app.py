@@ -261,7 +261,7 @@ if images:
         st.session_state.gallery_idx = (st.session_state.gallery_idx + 1) % len(images)
         st.session_state.last_update = time.time()
         time.sleep(0.1)  # Small delay to prevent rapid updates
-        st.experimental_rerun()
+        st.rerun()
 else:
     st.info("✨ Photos coming soon! Add images to the 'gallery' folder to see them here!")
 
